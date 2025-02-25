@@ -1,18 +1,16 @@
 [main]
 name = "wre"
+icon = "acrobat"
 entry_points=["e","b","c"]
 [e]
 type="button"
-callback="egr"
 name="e"
-opt_params={callback="egr"}
+opt_params={callback="notify-send hi"}
 [b]
 type="button"
-
 name="mutton"
 opt_params={callback="egr"}
 [c]
 type="button"
-
 name="wutton"
-opt_params={callbdack="egr"}
+opt_params={callback="egr"}
