@@ -1,16 +1,20 @@
 [main]
 name = "wre"
-icon = "acrobat"
-entry_points=["e","b","c"]
-[e]
-type="button"
-name="e"
-opt_params={callback="notify-send hi"}
+icon = "network-wireless"
+entry_points=["e","b","c","d"]
 [b]
-type="button"
-name="mutton"
-opt_params={callback="egr"}
+type = "Button"
+name = "Wifi SSID"
+opt_params={callback='password=$(nmcli device wifi show -s | grep "SSID" | sed "s/SSID:/ /g") && notify-send "Wi-Fi SSID" "$password"'}
+[e]
+type="ImageButton"
+name="Wifi Password"
+opt_params={callback='password=$(nmcli device wifi show -s | grep "Password" | sed "s/Password:/ /g") && notify-send "Wi-Fi Password" "$password"',image="/home/ishaan/Downloads/Screenshot_20241214_225722.png"}
 [c]
-type="button"
-name="wutton"
-opt_params={callback="egr"}
+type="Button"
+name = "Play 2048"
+opt_params={callback='kitty 2048-tui'}
+[d]
+type = "Button"
+name = "Clean Package Cache"
+opt_params = {callback = 'pacman -Qdtq | sudo pacman -Rns -pacman -Qqd | sudo pacman -Rsu -yay -Scc --noconfirm sudo paccache -rk0 && notify-send "Cleared Package Cache!"'}

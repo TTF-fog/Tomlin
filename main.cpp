@@ -1,6 +1,6 @@
 #include <iostream>
+#include <list>
 #include <map>
-#include <utility>
 #include <vector>
 #include <string>
 #include "traypp//tray/include/tray.hpp"
@@ -9,7 +9,6 @@ class TrayItem {
     public:
         std::string type;
         std::string name;
-        std::string callback;
         std::map<std::string,std::string> opt_params;
         Tray::Tray &tray;
 
@@ -19,42 +18,38 @@ class TrayItem {
 
     private:
         void populate() {
-            if (this->type == "button") {
-                try {
-                    std::string v = this->opt_params.at("callback");
+            if (this->type == "Button") {
+                auto v  = parse_params<std::string,std::string>(opt_params,{"callback"});
                     tray.addEntry(Tray::Button(this->name, [v, this]{
-                        exec( v.c_str() );
-
-                  }));
-                }
-                catch (std::exception e) {
-                    std::cerr << "Could not find callback skipping " << this->name << std::endl;
-                }
-
-
-            }else{
-                std::cerr << "Error: " << type << "is not a type"<< std::endl;
+                        system( v.at("callback").c_str());
+                    }));
+            }else if (this->type == "ImageButton") {
+                auto v =this->parse_params<std::string,std::string>(this->opt_params,{"callback","image"});
+                tray.addEntry(Tray::ImageButton(this->name, v["image"],[v, this] {
+                    system( v.at("callback").c_str());
+                }));
+            }
+            else{
+                throw_error("Could not find type");
             }
         }
-    std::string exec(const char* cmd) {
-            std::array<char, 128> buffer;
-            std::string result;
-            std::unique_ptr<FILE, void(*)(FILE*)> pipe(popen(cmd, "r"),
-            [](FILE * f) -> void
-            {
-                // wrapper to ignore the return value from pclose() is needed with newer versions of gnu g++
-                std::ignore = pclose(f);
-            });
-            if (!pipe) {
-                throw std::runtime_error("popen() failed!");
-            }
-            while (fgets(buffer.data(), static_cast<int>(buffer.size()), pipe.get()) != nullptr) {
-                result += buffer.data();
-            }
 
-            return result;
+        template <typename T, typename C>
+        std::map<T,C> parse_params(std::map<T,std::string> data, std::list<T> args) {
+            std::map<T, C> params;
+            for (auto i : args) {
+                try {
+                    params[i] = data.at(i);
+                }catch (std::out_of_range &e) {
+                    throw_error("Could not find required parameter " + i + " in opt_params");
+                    params[i] = C();
+                }
+            }
+            return params;
         }
-
+    void throw_error(std::string error) {
+            std::cerr << std::format("{} for name: {} of type {}",error ,this->name, this->type) << std::endl;
+        }
 
 };
 class trayApp {
@@ -85,6 +80,6 @@ public:
 
 
 int main() {
-    trayApp app("yomper","acroread");
+    trayApp app("yomper","network-wireless");
     return 1;
 }
