@@ -52,11 +52,12 @@ class TrayItem {
         }
 
 };
-class trayApp {
+class trayContainer {
 public:
     std::vector<std::string> entries;
     std::vector<TrayItem> items;
-    trayApp(const std::string &name, const std::string &icon){
+
+    trayContainer(const std::string &name, const std::string &icon){
         Tray::Tray tray (name,icon);
 
         auto data = toml::parse("config.toml");
@@ -72,14 +73,21 @@ public:
         }
         tray.run();
         }
-
+    void run() {
+        tray.run();
+    }
 
 
 };
-
+class TrayMenu:trayContainer {
+    trayContainer *tray;
+    public:
+    TrayMenu(trayContainer *tray): trayContainer(), tray(tray) {
+    }
+};
 
 
 int main() {
-    trayApp app("yomper","network-wireless");
+    trayContainer app("yomper","network-wireless");
     return 1;
 }
